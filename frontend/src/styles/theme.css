@@ -1,0 +1,62 @@
+:root{
+  --bg:#EFF0E3; --paper:#FBFAF4; --ink:#20281E; --sub:#5B6152; --line:#D6D3BE;
+  --ok:#3E7A52; --warn:#C6871F; --danger:#B23B3B; --star:#A8631E; --star-bg:#F3E4CC;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#171A14; --paper:#20241B; --ink:#EAE8DC; --sub:#9CA292;
+    --line:#3A3E30; --star-bg:#3A2E17;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#171A14; --paper:#20241B; --ink:#EAE8DC; --sub:#9CA292;
+  --line:#3A3E30; --star-bg:#3A2E17;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%;}
+*{box-sizing:border-box;}
+body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:600;margin:0;}
+.wrap{max-width:640px;margin:0 auto;padding:24px 18px 60px;}
+header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+header h1{font-size:26px;}
+header .sub{color:var(--sub);font-size:13px;}
+nav{display:flex;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:20px;}
+nav button{flex:1;padding:9px 6px;border:none;background:transparent;border-radius:7px;font:500 14px Inter;color:var(--sub);cursor:pointer;}
+nav button.active{background:var(--ink);color:var(--paper);}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+input,select,textarea{font:400 14px Inter;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);}
+textarea{width:100%;min-height:70px;resize:vertical;font-family:Inter;}
+input[type=text],input[type=number],input[type=date],input[type=password]{flex:1;min-width:90px;}
+button.btn{font:600 13px Inter;padding:9px 14px;border:none;border-radius:7px;background:var(--ink);color:var(--paper);cursor:pointer;}
+button.btn.secondary{background:transparent;border:1px solid var(--line);color:var(--ink);}
+button.icon{background:none;border:none;color:var(--sub);cursor:pointer;font-size:15px;padding:2px 6px;}
+button.icon:hover{color:var(--danger);}
+.item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dotted var(--line);}
+.item:last-child{border-bottom:none;}
+.item .name{font-weight:500;flex:1;min-width:0;}
+.item .meta{color:var(--sub);font-size:12px;white-space:nowrap;}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dot.ok{background:var(--ok);} .dot.warn{background:var(--warn);} .dot.bad{background:var(--danger);}
+.star-tag{background:var(--star-bg);color:var(--star);font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;}
+.empty{color:var(--sub);font-size:14px;padding:20px 0;text-align:center;}
+.pill-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.pill{background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:3px 10px;font-size:12px;display:flex;align-items:center;gap:5px;}
+.pill button{border:none;background:none;color:var(--sub);cursor:pointer;font-size:12px;line-height:1;}
+.idea{border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px;}
+.idea h3{font-size:16px;margin-bottom:4px;}
+.idea .badges{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0;}
+.badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;}
+.badge.match{background:#DCE9DE;color:var(--ok);}
+.badge.expiring{background:#F6D9D9;color:var(--danger);}
+@media (prefers-color-scheme:dark){ .badge.match{background:#25352A;} .badge.expiring{background:#3A2323;} }
+.idea ul{margin:6px 0 0;padding-left:18px;font-size:14px;}
+.idea li.have{color:var(--ink);} .idea li.missing{color:var(--sub);}
+.idea li .starred{color:var(--star);font-weight:600;}
+.starred{color:var(--star);font-weight:600;}
+label.small{font-size:12px;color:var(--sub);display:block;margin-bottom:3px;}
+.servings-box{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.servings-box input{width:60px;flex:none;}
+footer.hint{color:var(--sub);font-size:12px;text-align:center;margin-top:20px;}
