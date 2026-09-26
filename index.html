@@ -95,6 +95,9 @@ let fridge = load('fm_fridge', []);
 let ideas = load('fm_ideas', []);
 let stars = load('fm_stars', ['chicken','eggplant','eggs','fresh mozzarella']);
 let servingsForMe = load('fm_servings', 1);
+let ghToken = load('fm_gh_token', '');
+let gistId = load('fm_gist_id', '');
+let lastSync = load('fm_last_sync', '');
 let tab = 'fridge';
 
 function isStar(name){
@@ -142,12 +145,14 @@ function fmtQty(n){
 function switchTab(t){ tab=t; render(); }
 
 function render(){
-  $('#tabs').innerHTML = ['fridge','ideas','tonight'].map(t =>
-    `<button class="${t===tab?'active':''}" onclick="switchTab('${t}')">${t==='fridge'?'Fridge':t==='ideas'?'Ideas':'Tonight'}</button>`
+  const labels = {fridge:'Fridge', ideas:'Ideas', tonight:'Tonight', sync:'Sync'};
+  $('#tabs').innerHTML = Object.keys(labels).map(t =>
+    `<button class="${t===tab?'active':''}" onclick="switchTab('${t}')">${labels[t]}</button>`
   ).join('');
   if(tab==='fridge') renderFridge();
   else if(tab==='ideas') renderIdeas();
-  else renderTonight();
+  else if(tab==='tonight') renderTonight();
+  else renderSync();
 }
 
 function renderFridge(){
@@ -289,6 +294,80 @@ function renderTonight(){
     save('fm_servings', servingsForMe);
     renderTonight();
   });
+}
+
+function gatherState(){ return { fridge, ideas, stars, servingsForMe }; }
+function applyState(d){
+  fridge = d.fridge || []; ideas = d.ideas || []; stars = d.stars || []; servingsForMe = d.servingsForMe || 1;
+  save('fm_fridge', fridge); save('fm_ideas', ideas); save('fm_stars', stars); save('fm_servings', servingsForMe);
+}
+function ghHeaders(){ return { 'Authorization': 'token '+ghToken, 'Accept':'application/vnd.github+json', 'Content-Type':'application/json' }; }
+function setSyncStatus(msg, isError){
+  const el = $('#sync-status'); if(!el) return;
+  el.textContent = msg; el.style.color = isError ? 'var(--danger)' : 'var(--ok)';
+}
+async function createGist(){
+  ghToken = $('#gh-token').value.trim(); save('fm_gh_token', ghToken);
+  if(!ghToken){ setSyncStatus('Paste a token first.', true); return; }
+  setSyncStatus('Creating…');
+  try{
+    const res = await fetch('https://api.github.com/gists', { method:'POST', headers: ghHeaders(),
+      body: JSON.stringify({ description:'feedMe sync data', public:false, files:{ 'feedme-data.json': { content: JSON.stringify(gatherState(),null,2) } } }) });
+    if(!res.ok) throw new Error('GitHub said: '+res.status);
+    const data = await res.json();
+    gistId = data.id; save('fm_gist_id', gistId);
+    lastSync = new Date().toLocaleString(); save('fm_last_sync', lastSync);
+    setSyncStatus('Created and synced. Use this same Gist ID on your other device.');
+    renderSync();
+  }catch(e){ setSyncStatus('Could not create gist — '+e.message, true); }
+}
+async function pushToCloud(){
+  ghToken = $('#gh-token').value.trim(); gistId = $('#gist-id').value.trim();
+  save('fm_gh_token', ghToken); save('fm_gist_id', gistId);
+  if(!ghToken || !gistId){ setSyncStatus('Need both a token and a Gist ID.', true); return; }
+  setSyncStatus('Pushing…');
+  try{
+    const res = await fetch('https://api.github.com/gists/'+gistId, { method:'PATCH', headers: ghHeaders(),
+      body: JSON.stringify({ files:{ 'feedme-data.json': { content: JSON.stringify(gatherState(),null,2) } } }) });
+    if(!res.ok) throw new Error('GitHub said: '+res.status);
+    lastSync = new Date().toLocaleString(); save('fm_last_sync', lastSync);
+    setSyncStatus('Pushed. Last synced '+lastSync+'.');
+  }catch(e){ setSyncStatus('Push failed — '+e.message, true); }
+}
+async function pullFromCloud(){
+  ghToken = $('#gh-token').value.trim(); gistId = $('#gist-id').value.trim();
+  save('fm_gh_token', ghToken); save('fm_gist_id', gistId);
+  if(!ghToken || !gistId){ setSyncStatus('Need both a token and a Gist ID.', true); return; }
+  setSyncStatus('Pulling…');
+  try{
+    const res = await fetch('https://api.github.com/gists/'+gistId, { headers: ghHeaders() });
+    if(!res.ok) throw new Error('GitHub said: '+res.status);
+    const data = await res.json();
+    const file = data.files['feedme-data.json'];
+    if(!file) throw new Error('no feedme-data.json in that gist');
+    applyState(JSON.parse(file.content));
+    lastSync = new Date().toLocaleString(); save('fm_last_sync', lastSync);
+    setSyncStatus('Pulled. Last synced '+lastSync+'.');
+    render();
+  }catch(e){ setSyncStatus('Pull failed — '+e.message, true); }
+}
+function renderSync(){
+  $('#content').innerHTML = `
+    <div class="card">
+      <h3 style="margin-bottom:6px;">Sync across devices</h3>
+      <p style="color:var(--sub);font-size:13px;margin:0 0 12px;">Uses a private GitHub Gist as a small cloud drop point for your data. Create a token scoped to <strong>gist</strong> only (github.com/settings/tokens) — not the same token used to deploy this page. Note: a "secret" gist isn't listed publicly, but anyone who gets the Gist ID could still view its contents, so don't share it.</p>
+      <label class="small">GitHub token (gist scope)</label>
+      <div class="row"><input type="password" id="gh-token" value="${ghToken}" placeholder="ghp_..."></div>
+      <label class="small">Gist ID</label>
+      <div class="row"><input type="text" id="gist-id" value="${gistId}" placeholder="leave blank to create one"></div>
+      <div class="row">
+        <button class="btn secondary" onclick="createGist()">Create new gist</button>
+        <button class="btn secondary" onclick="pullFromCloud()">Pull from cloud</button>
+        <button class="btn" onclick="pushToCloud()">Push to cloud</button>
+      </div>
+      <div id="sync-status" style="font-size:13px;margin-top:8px;">${lastSync ? 'Last synced '+lastSync+'.' : 'Not synced yet.'}</div>
+    </div>
+  `;
 }
 
 render();
