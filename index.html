@@ -174,7 +174,7 @@ function renderFridge(){
     </div>
     <div class="card">
       <h3 style="margin-bottom:6px;">In the fridge (${fridge.length})</h3>
-      ${sorted.length ? sorted.map(itemRow).join('') : '<div class="empty">Nothing logged yet — add what you\\'ve got above.</div>'}
+      ${sorted.length ? sorted.map(itemRow).join('') : '<div class="empty">Nothing logged yet — add what you&#39;ve got above.</div>'}
     </div>
   `;
   $('#star-pills').innerHTML = stars.map(s=>`<span class="pill">${s}<button onclick="removeStar('${s.replace(/'/g,"\\'")}')">✕</button></span>`).join('') || '<span class="sub" style="font-size:12px;color:var(--sub);">none set</span>';
@@ -282,7 +282,7 @@ function renderTonight(){
           return `<li class="${l.have?'have':'missing'}">${scaled} ${l.unit} ${isStar(l.name)?`<span class="starred">${l.name}</span>`:l.name}${l.have?'':' — need to buy'}</li>`;
         }).join('')}</ul>
       </div>
-    `).join('') : '<div class="empty">Save some recipe ideas first — they\\'ll show up here ranked by what you can make right now.</div>'}
+    `).join('') : '<div class="empty">Save some recipe ideas first — they&#39;ll show up here ranked by what you can make right now.</div>'}
   `;
   $('#servings-input').addEventListener('change', e=>{
     servingsForMe = parseFloat(e.target.value)||1;
