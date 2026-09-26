@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Larder</title>
+<title>feedMe</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -73,7 +73,7 @@ footer.hint{color:var(--sub);font-size:12px;text-align:center;margin-top:20px;}
 <div class="wrap">
   <header>
     <div>
-      <h1>Larder</h1>
+      <h1>feedMe</h1>
       <div class="sub">what you've got, what to make</div>
     </div>
   </header>
@@ -91,10 +91,10 @@ function load(key, fallback){
 }
 function save(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
 
-let fridge = load('lt_fridge', []);
-let ideas = load('lt_ideas', []);
-let stars = load('lt_stars', ['chicken','eggplant','eggs','fresh mozzarella']);
-let servingsForMe = load('lt_servings', 1);
+let fridge = load('fm_fridge', []);
+let ideas = load('fm_ideas', []);
+let stars = load('fm_stars', ['chicken','eggplant','eggs','fresh mozzarella']);
+let servingsForMe = load('fm_servings', 1);
 let tab = 'fridge';
 
 function isStar(name){
@@ -195,15 +195,15 @@ function addFridgeItem(){
   const name = $('#f-name').value.trim();
   if(!name) return;
   fridge.push({ id: uid(), name, qty: $('#f-qty').value.trim(), unit: $('#f-unit').value.trim(), expiry: $('#f-expiry').value });
-  save('lt_fridge', fridge);
+  save('fm_fridge', fridge);
   renderFridge();
 }
-function removeFridgeItem(id){ fridge = fridge.filter(i=>i.id!==id); save('lt_fridge', fridge); renderFridge(); }
+function removeFridgeItem(id){ fridge = fridge.filter(i=>i.id!==id); save('fm_fridge', fridge); renderFridge(); }
 function addStar(){
   const v = $('#star-input').value.trim().toLowerCase();
-  if(v && !stars.includes(v)){ stars.push(v); save('lt_stars', stars); render(); }
+  if(v && !stars.includes(v)){ stars.push(v); save('fm_stars', stars); render(); }
 }
-function removeStar(s){ stars = stars.filter(x=>x!==s); save('lt_stars', stars); render(); }
+function removeStar(s){ stars = stars.filter(x=>x!==s); save('fm_stars', stars); render(); }
 
 function renderIdeas(){
   $('#content').innerHTML = `
@@ -240,10 +240,10 @@ function addIdea(){
   const servings = parseInt($('#i-servings').value)||4;
   const ingredients = $('#i-ingredients').value.split('\n').map(parseIngredientLine).filter(Boolean);
   ideas.push({ id: uid(), title, servings, ingredients });
-  save('lt_ideas', ideas);
+  save('fm_ideas', ideas);
   renderIdeas();
 }
-function removeIdea(id){ ideas = ideas.filter(i=>i.id!==id); save('lt_ideas', ideas); renderIdeas(); }
+function removeIdea(id){ ideas = ideas.filter(i=>i.id!==id); save('fm_ideas', ideas); renderIdeas(); }
 
 function matchIdea(idea){
   const fridgeNames = fridge.map(f=>({name:f.name.toLowerCase(), days: daysUntil(f.expiry)}));
@@ -286,7 +286,7 @@ function renderTonight(){
   `;
   $('#servings-input').addEventListener('change', e=>{
     servingsForMe = parseFloat(e.target.value)||1;
-    save('lt_servings', servingsForMe);
+    save('fm_servings', servingsForMe);
     renderTonight();
   });
 }
